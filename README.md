@@ -92,3 +92,14 @@ The filenames in the samples dir have name indicating "Real time" it took for th
 
 for e.g. you see that 2h17min42sec.gcode file that was printed in reality in 2:17:42 have calculated time of 02:19:56 while Simplify3D predicted 1:39:00 .. so while our estimate was 2min out for over 2 hour print Simplify3D missed the mark by 40 minutes.
 
+To integrate this with Simplify3D you can create a batch file like:
+
+```
+@echo off
+e:\path\to\gcodestat\gcodestat.exe -d 0.02 -a 1000 --gcode=%* | c:\Windows\System32\msg.exe %username%
+```
+and put in the "Scripts" tab, "additional terminal commands for postprocessing" a line that call's it:
+
+```
+e:\path\to\gcodestat\gs.bat "[output_filepath]" 
+```
