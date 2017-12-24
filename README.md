@@ -96,10 +96,28 @@ To integrate this with Simplify3D you can create a batch file like:
 
 ```
 @echo off
-e:\path\to\gcodestat\gcodestat.exe -d 0.02 -a 1000 --gcode=%* | c:\Windows\System32\msg.exe %username%
+
+for %%a in (%1) do (
+    set filepath=%%~dpa
+    set filename=%%~na
+    set extension=%%~xa
+)   
+set if=%filepath%%filename%%extension%
+set of=%filepath%%filename%_M117%extension%
+
+E:\Dev\eclipse-workspace\gcodestat\gcodestat.exe -d 0.02 -a 1000 --gcode="%if%" --output="%of%" | c:\Windows\System32\msg.exe %username%
 ```
-and put in the "Scripts" tab, "additional terminal commands for postprocessing" a line that call's it:
+
+you can even add curl to shoot the %of% directly to octoprint (as in gs.bat that's part of the code), or some SED/AWK to do some search/replace etc etc.. 
+
+and then put in the "Scripts" tab, "additional terminal commands for postprocessing" a line that call's it:
 
 ```
 e:\path\to\gcodestat\gs.bat "[output_filepath]" 
 ```
+
+if you don't want the windows popup to show you time left you can add -q or --quiet so you suppress any output
+
+the M117 file you create, even if you don't have a LCD on your printer and you use Octoprint as a host you can use some of the Octoprint plugins to display M117 messages in browser during print, for e.g.
+https://github.com/AmedeeBulle/StatusLine
+https://github.com/jneilliii/OctoPrint-M117PopUp
