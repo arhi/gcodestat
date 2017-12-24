@@ -114,12 +114,10 @@ int gcode(char *buffer) {
 int read_gvalue(char *buffer, char name, double * value){
   char c;
 
-//  while ('\0'!=( c = *(buffer++)))
-//    if ((c & 0xDF) == 'G')
-      while( (c =  *(buffer++) ) != '\0')
-        if ((c & 0xDF) == name ){
-              *value = atof(buffer++);
-              return(0);
+  while( (c =  *(buffer++) ) != '\0')
+     if ((c & 0xDF) == name ){
+         *value = atof(buffer++);
+         return(0);
   }
   return(-1);
 }

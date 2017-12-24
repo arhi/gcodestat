@@ -12,12 +12,12 @@ PROGS  := gcodestat.exe
 all: ${PROGS}
 
 ${PROGS}: ${OBJS} Makefile
-	${CC} ${OBJS} ${LFLAGS} -o $@ 
+	${CC} ${OBJS} ${LFLAGS} -g -o $@ 
 
 clean:
 	rm -f ${PROGS} ${OBJS}
 
 %.o: %.c Makefile
-	${CC} ${CFLAGS} -c $<
+	${CC} ${CFLAGS} -g -c $<
 
 

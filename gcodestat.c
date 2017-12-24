@@ -33,12 +33,14 @@ void print_usage() {
 	fprintf(stderr, "\t-h, --help\t\t\t\tshow help\n");
 	fprintf(stderr, "\t-g, --gcode samples/test.gcode\t\tFile to analyze\n");
 	fprintf(stderr, "\t-c, --config samples/config.txt\t\tSmoothieware config file\n");
+	fprintf(stderr, "\t-o, --output <outputfile.gcode>\t\tWhere to save modified G-Code file\n");
 	fprintf(stderr, "\t-a, --acceleration %d\t\t\tDefault XY acceleration in mm/sec/sec\n", DEFAULT_ACCELERATION);
 	fprintf(stderr, "\t-d, --junction_deviation %f\tDefault Junction Deviation\n", DEFAULT_JUNCTION_DEVIATION);
 	fprintf(stderr, "\t-j, --jerk %f\t\t\tDefault jerk\n", DEFAULT_JERK);
 	fprintf(stderr, "\t-f, --max_feed %d\t\t\tMax feed\n", DEFAULT_MAX_SPEED);
 	fprintf(stderr, "\t-r, --retract_time %f\t\tRetraction time in sec\n",DEFAULT_RETRACT_TIME);
 	fprintf(stderr, "\t-p, --prime_time %f\t\tPrime time in sec\n",DEFAULT_PRIME_TIME);
+	fprintf(stderr, "\t-s, --percent_step 10\t\t\tChange LCD data every ##%%\n");
 	fprintf(stderr, "\n\n");
 	return;
 }
@@ -47,7 +49,7 @@ void print_usage() {
  * print_config(*print_settings) - print config info
  */
 void print_config(print_settings_t * ps){
-	fprintf(stderr, "gcodestat v0.0\n");
+	fprintf(stderr, "gcodestat v0.1\n");
 	fprintf(stderr, "Starting with parameters:\n");
 	fprintf(stderr, "\tacceleration: \t\t%f mm/sec/sec\n", ps->accel);
 	fprintf(stderr, "\tjunction deviation: \t%f\n", ps->jdev);
@@ -64,19 +66,37 @@ void print_config(print_settings_t * ps){
     return;
 }
 
+void print_timeleft(FILE* f, long int sec){
+    fprintf(f, "( ");
+    if (sec > 60*60*24*7) fprintf(f, "%ld weeks, ", sec / 60 / 60 / 24 / 7);
+    if (sec > 60*60*24  ) fprintf(f, "%ld days, " , (sec / 60 / 60 / 24) % 7);
+    if (sec > 60*60     ) fprintf(f, "%02ld:"     , (sec / 3600) %24);
+    fprintf(f, "%02ld:"                           , (sec / 60) % 60);
+    fprintf(f, "%02ld )"                          ,  sec % 60);
+}
+
 /*
  * main
  */
 int main(int argc, char** argv){
-  FILE *f;
-  char *lb;
+  FILE *f = NULL;
+  FILE *output_file = NULL;
+  char *lb = NULL;
   char *gcodefile = NULL;
-  double seconds;
+  char *gcodeout  = NULL;
+  double seconds = 0;
+  double total_seconds = 0;
   print_settings_t print_settings;
+  bool quiet = false;
+  int pass;
+  double next_pct = 100;
+  double pct_step = 0.1;
+
 
   static struct option long_options[] = {
       {"help", no_argument, NULL, 'h'},
       {"gcode", required_argument, NULL, 'g'},
+      {"output", required_argument, NULL, 'o'},
       {"config", required_argument, NULL, 'c'},
       {"acceleration", required_argument, NULL, 'a'},
       {"junction_deviation", required_argument, NULL, 'd'},
@@ -86,6 +106,7 @@ int main(int argc, char** argv){
       {"max_z_speed", required_argument, NULL, 'z'},
       {"retract_time", required_argument, NULL, 'r'},
       {"prime_time", required_argument, NULL, 'p'},
+      {"percent_step", required_argument, NULL, 's'},
       {NULL, 0, NULL, 0}
   };
 
@@ -102,13 +123,17 @@ int main(int argc, char** argv){
   print_settings.ptime         = DEFAULT_PRIME_TIME;          // default prime time
   print_settings.jerk          = false;                       // default we use junction deviation
   print_settings.speedoverride = 1.0;
-
-  seconds = 0.0;
+  quiet                        = false;
+  next_pct                     = 0.9;
+  seconds                      = 0.0;
   
   int option_index = 0;
 	int getopt_result;
-	while ((getopt_result = getopt_long(argc, argv, "?hg:c:a:d:j:x:y:z:r:p:", long_options, &option_index)) != -1) {
+	while ((getopt_result = getopt_long(argc, argv, "q?hg:c:a:d:j:x:y:z:r:p:o:s:", long_options, &option_index)) != -1) {
 		switch (getopt_result) {
+		case 'q':
+			quiet = true;
+			break;
 		case 'h':
 		case '?':
 			print_usage();
@@ -117,6 +142,14 @@ int main(int argc, char** argv){
 		case 'g':
 			if (optarg) {
 				gcodefile = strdup(optarg);
+			} else {
+				print_usage();
+				return (-1);
+			}
+			break;
+		case 'o':
+			if (optarg) {
+				gcodeout = strdup(optarg);
 			} else {
 				print_usage();
 				return (-1);
@@ -229,6 +262,18 @@ int main(int argc, char** argv){
 				return (-1);
 			}
 			break;
+		case 's':
+			if (optarg) {
+				pct_step = atof(optarg)/100.0F;
+				if (pct_step > 1.0F || pct_step < 0.01F) {
+					fprintf(stderr, "Invalid percent step value: %s, please use value between 1 and 100\n", optarg);
+					return (-1);
+				}
+			} else {
+				print_usage();
+				return (-1);
+			}
+			break;
 		}
 	}
 
@@ -245,69 +290,103 @@ int main(int argc, char** argv){
       return(-2);
   }
 
-  print_config(&print_settings);
-
-
-  while (fgets(lb, LINE_BUFFER_LENGTH, f)){
-     if (comment(lb)) continue;
-     switch(gcode(lb)){
-       case GCODE_MOVE:
-         seconds += calcmove( lb, &print_settings);
-         break;
-       case GCODE_DWELL:
-         seconds += read_dwell(lb);
-         break;
-       case GCODE_RETRACT:
-    	   break;
-       case GCODE_INCH:
-    	   print_settings.mm=false;
-         break;
-       case GCODE_MM:
-    	   print_settings.mm=true;
-         break;
-       case GCODE_ABS:
-    	   print_settings.abs=true;
-         break;
-       case GCODE_REL:
-    	   print_settings.abs=false;
-         break;
-       case GCODE_EABS:
-    	   print_settings.eabs=true;
-         break;
-       case GCODE_EREL:
-    	   print_settings.eabs=false;
-         break;
-       case GCODE_MAXFEED:
-    	   read_maxfeed(lb, &print_settings);
-         break;
-       case GCODE_ACCEL:
-    	   read_accel(lb, &print_settings);
-         break;
-       case GCODE_JDEV:
-    	   read_jdev(lb, &print_settings);
-         break;
-       case GCODE_RLEN:
-    	   read_rtime(lb, &print_settings);
-         break;
-       case GCODE_PLEN:
-    	   read_ptime(lb, &print_settings);
-         break;
-       case GCODE_SPEEDOVER:
-    	   read_speedover(lb, &print_settings);
-         break;
-     }
-
+  if (gcodeout != NULL) {
+	  if (NULL == (output_file = fopen(gcodeout, "w"))){
+	      fprintf(stderr,"Cannot open %s for write\n", gcodeout);
+	      fclose(f);
+	      print_usage();
+	      return(-2);
+	  }
   }
+
+
+  if (!quiet) print_config(&print_settings);
+  next_pct = 1 - pct_step;
+  for (pass = 0; pass < (output_file != NULL ?2:1); pass++) {
+	    if (pass == 1){
+	    	rewind(f);
+	    	total_seconds = seconds;
+	    	seconds = 0;
+	    	fprintf(output_file, "M117 100%% Remaining ");
+	    	print_timeleft(output_file, (long int) floor(total_seconds));
+     	    fprintf(output_file, "\n");
+
+	    }
+		while (fgets(lb, LINE_BUFFER_LENGTH, f)) {
+			if (pass == 1) {
+				fputs(lb, output_file);
+				if (next_pct > 0.01 && (total_seconds - seconds)/total_seconds < next_pct ){
+					fprintf(output_file, "M117 %i%% Remaining ", (int) floor(next_pct * 100));
+			    	print_timeleft(output_file, (long int) floor(total_seconds - seconds));
+			    	fprintf(output_file, "\n");
+					next_pct -= pct_step;
+				}
+			}
+
+			if (comment(lb)) continue;
+
+			switch (gcode(lb)) {
+			case GCODE_MOVE:
+				seconds += calcmove(lb, &print_settings);
+				break;
+			case GCODE_DWELL:
+				seconds += read_dwell(lb);
+				break;
+			case GCODE_RETRACT:
+				break;
+			case GCODE_INCH:
+				print_settings.mm = false;
+				break;
+			case GCODE_MM:
+				print_settings.mm = true;
+				break;
+			case GCODE_ABS:
+				print_settings.abs = true;
+				break;
+			case GCODE_REL:
+				print_settings.abs = false;
+				break;
+			case GCODE_EABS:
+				print_settings.eabs = true;
+				break;
+			case GCODE_EREL:
+				print_settings.eabs = false;
+				break;
+			case GCODE_MAXFEED:
+				read_maxfeed(lb, &print_settings);
+				break;
+			case GCODE_ACCEL:
+				read_accel(lb, &print_settings);
+				break;
+			case GCODE_JDEV:
+				read_jdev(lb, &print_settings);
+				break;
+			case GCODE_RLEN:
+				read_rtime(lb, &print_settings);
+				break;
+			case GCODE_PLEN:
+				read_ptime(lb, &print_settings);
+				break;
+			case GCODE_SPEEDOVER:
+				read_speedover(lb, &print_settings);
+				break;
+			}
+
+		}
+  }
+
+
+
+
   fclose(f);
 
-  fprintf(stdout, "Total seconds: %f\n", seconds);
-  long int sec = (long int) floor(seconds);
-  fprintf(stdout, "Total ");
-  if (sec > 60*60*24*7) fprintf(stdout, "%ld weeks, ", sec / 60 / 60 / 24 / 7);
-  if (sec > 60*60*24  ) fprintf(stdout, "%ld days, " , (sec / 60 / 60 / 24) % 7);
-  if (sec > 60*60     ) fprintf(stdout, "%02ld:"     , (sec / 3600) %24);
-  fprintf(stdout, "%02ld:"                           , (sec / 60) % 60);
-  fprintf(stdout, "%02ld\n\n"                        ,  sec % 60);
+  if (!quiet){
+    long int sec = (long int) floor(total_seconds);
+    fprintf(stdout, "Total time: ");
+	print_timeleft(stdout, sec);
+    fprintf(stdout, "\n");
+  }
 
+  fclose(output_file);
   return 0;
 }
