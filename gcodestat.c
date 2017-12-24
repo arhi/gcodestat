@@ -31,6 +31,7 @@
 void print_usage() {
 	fprintf(stderr, "gcodestat \n");
 	fprintf(stderr, "\t-h, --help\t\t\t\tshow help\n");
+	fprintf(stderr, "\t-1, --quiet\t\t\t\tsuppress any output\n");
 	fprintf(stderr, "\t-g, --gcode samples/test.gcode\t\tFile to analyze\n");
 	fprintf(stderr, "\t-c, --config samples/config.txt\t\tSmoothieware config file\n");
 	fprintf(stderr, "\t-o, --output <outputfile.gcode>\t\tWhere to save modified G-Code file\n");
@@ -95,7 +96,8 @@ int main(int argc, char** argv){
 
   static struct option long_options[] = {
       {"help", no_argument, NULL, 'h'},
-      {"gcode", required_argument, NULL, 'g'},
+      {"quiet", no_argument, NULL, 'q'},
+	  {"gcode", required_argument, NULL, 'g'},
       {"output", required_argument, NULL, 'o'},
       {"config", required_argument, NULL, 'c'},
       {"acceleration", required_argument, NULL, 'a'},
@@ -381,7 +383,7 @@ int main(int argc, char** argv){
   fclose(f);
 
   if (!quiet){
-    long int sec = (long int) floor(total_seconds);
+    long int sec = (long int) floor(seconds);
     fprintf(stdout, "Total time: ");
 	print_timeleft(stdout, sec);
     fprintf(stdout, "\n");
