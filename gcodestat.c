@@ -38,6 +38,7 @@ void print_usage() {
 	fprintf(stderr, "\t-a, --acceleration %d\t\t\tDefault XY acceleration in mm/sec/sec\n", DEFAULT_ACCELERATION);
 	fprintf(stderr, "\t-d, --junction_deviation %f\tDefault Junction Deviation\n", DEFAULT_JUNCTION_DEVIATION);
 	fprintf(stderr, "\t-j, --jerk %f\t\t\tDefault jerk\n", DEFAULT_JERK);
+	fprintf(stderr, "\t-6, --heatup_time 0\t\t\tConstant time to add to result (seconds)\n");
 	fprintf(stderr, "\t-f, --max_feed %d\t\t\tMax feed\n", DEFAULT_MAX_SPEED);
 	fprintf(stderr, "\t-r, --retract_time %f\t\tRetraction time in sec\n",DEFAULT_RETRACT_TIME);
 	fprintf(stderr, "\t-p, --prime_time %f\t\tPrime time in sec\n",DEFAULT_PRIME_TIME);
@@ -92,6 +93,7 @@ int main(int argc, char** argv){
   int pass;
   double next_pct = 100;
   double pct_step = 0.1;
+  double heatup_time = 0.0;
 
 
   static struct option long_options[] = {
@@ -103,6 +105,7 @@ int main(int argc, char** argv){
       {"acceleration", required_argument, NULL, 'a'},
       {"junction_deviation", required_argument, NULL, 'd'},
       {"jerk", required_argument, NULL, 'j'},
+      {"heatup_time", required_argument, NULL, 't'},
       {"max_x_speed", required_argument, NULL, 'x'},
       {"max_y_speed", required_argument, NULL, 'y'},
       {"max_z_speed", required_argument, NULL, 'z'},
@@ -127,11 +130,12 @@ int main(int argc, char** argv){
   print_settings.speedoverride = 1.0;
   quiet                        = false;
   next_pct                     = 0.9;
-  seconds                      = 0.0;
+  heatup_time                  = 0.0;
+  seconds                      = heatup_time;
   
   int option_index = 0;
 	int getopt_result;
-	while ((getopt_result = getopt_long(argc, argv, "q?hg:c:a:d:j:x:y:z:r:p:o:s:", long_options, &option_index)) != -1) {
+	while ((getopt_result = getopt_long(argc, argv, "q?hg:c:a:d:j:x:y:z:r:p:o:s:t:", long_options, &option_index)) != -1) {
 		switch (getopt_result) {
 		case 'q':
 			quiet = true;
@@ -198,6 +202,14 @@ int main(int argc, char** argv){
 				//TODO: implement jerk thingy
 				fprintf(stderr, "TODO: JERK IS NOT YET SUPORTED, SORRY\n");
 				return (-999);
+			} else {
+				print_usage();
+				return (-1);
+			}
+			break;
+		case 't':
+			if (optarg) {
+				heatup_time = atof(optarg);
 			} else {
 				print_usage();
 				return (-1);
@@ -308,7 +320,7 @@ int main(int argc, char** argv){
 	    if (pass == 1){
 	    	rewind(f);
 	    	total_seconds = seconds;
-	    	seconds = 0;
+	    	seconds = heatup_time;
 	    	fprintf(output_file, "M117 100%% Remaining ");
 	    	print_timeleft(output_file, (long int) floor(total_seconds));
      	    fprintf(output_file, "\n");
@@ -377,18 +389,20 @@ int main(int argc, char** argv){
 		}
   }
 
-
-
-
   fclose(f);
 
   if (!quiet){
-    long int sec = (long int) floor(seconds);
     fprintf(stdout, "Total time: ");
-	print_timeleft(stdout, sec);
+	print_timeleft(stdout, (long int) floor(seconds));
     fprintf(stdout, "\n");
   }
 
-  fclose(output_file);
+  if (output_file != NULL){
+	  fprintf(output_file, ";\n; gcodestat\n;  https://github.com/arhi/gcodestat\n");
+	  fprintf(output_file, ";  Total print time ");
+	  print_timeleft(output_file, (long int) floor(seconds));
+	  fprintf(output_file, "\n;\n");
+	  fclose(output_file);
+  }
   return 0;
 }
