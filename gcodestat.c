@@ -51,7 +51,7 @@ void print_usage() {
  * print_config(*print_settings) - print config info
  */
 void print_config(print_settings_t * ps){
-	fprintf(stderr, "gcodestat v0.1\n");
+	fprintf(stderr, "gcodestat v0.2\n");
 	fprintf(stderr, "Starting with parameters:\n");
 	fprintf(stderr, "\tacceleration: \t\t%f mm/sec/sec\n", ps->accel);
 	fprintf(stderr, "\tjunction deviation: \t%f\n", ps->jdev);
