@@ -11,7 +11,9 @@
 #include <stdbool.h>
 #include "gcodestat.h"
 
-#define min(a,b) (((a)<(b))?(a):(b))
+#ifndef _MIN_
+  #define _MIN_(a,b) (((a)<(b))?(a):(b))
+#endif
 
 bool comment(char *);
 int gcode(char *);

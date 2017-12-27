@@ -18,10 +18,6 @@
 #include <stdbool.h>
 #include "calcmove.h"
 
-double min(double x, double y){
-  return x<y?x:y;
-}
-
 double calcmove(char * buffer,  print_settings_t * print_settings){
   static double oldx = 0;        //old values required for sticky paremeters and other calcs
   static double oldy = 0;
@@ -115,11 +111,11 @@ double calcmove(char * buffer,  print_settings_t * print_settings){
 			speed = f;
 			if (costheta > -0.95F) {
 				sin_theta_d2 = sqrt(0.5 * (1.0 - costheta));
-				speed = min(speed, sqrt( print_settings->accel * print_settings->jdev * sin_theta_d2 / (1.0 - sin_theta_d2)));
+				speed = _MIN_(speed, sqrt( print_settings->accel * print_settings->jdev * sin_theta_d2 / (1.0 - sin_theta_d2)));
 			}
 		}
-		speed = min(speed, print_settings->x_maxspeed);
-		speed = min(speed, print_settings->y_maxspeed);
+		speed = _MIN_(speed, print_settings->x_maxspeed);
+		speed = _MIN_(speed, print_settings->y_maxspeed);
 
 		Ta = (f - oldspeed) / print_settings->accel; // time to reach speed from start speed (end speed of previous move)
 		Td = (f - speed) / print_settings->accel; // time to decelerate to "end speed" of current movement

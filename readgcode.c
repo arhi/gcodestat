@@ -165,7 +165,7 @@ int read_accel(char* buffer, print_settings_t *print_settings){
 	Xaccel = 0;
 	read_gvalue(buffer, 'S', &Saccel);
 	read_gvalue(buffer, 'X', &Xaccel);
-	if (min(Saccel, Xaccel) > 0) print_settings->accel = min(Saccel, Xaccel);
+	if (_MIN_(Saccel, Xaccel) > 0) print_settings->accel = _MIN_(Saccel, Xaccel);
 	return(0);
 }
 
