@@ -153,28 +153,51 @@ double read_dwell(char *buffer){
  * M203
  */
 int read_maxfeed(char *buff, print_settings_t *print_settings){
-	read_gvalue(buff, 'X', &(print_settings->x_maxspeed));
-	read_gvalue(buff, 'Y', &(print_settings->y_maxspeed));
-	read_gvalue(buff, 'Z', &(print_settings->z_maxspeed));
+   double X,Y,Z;
+	read_gvalue(buff, 'X', &X);
+	read_gvalue(buff, 'Y', &Y);
+	read_gvalue(buff, 'Z', &Z);
+	if (X > 0) print_settings->x_maxspeed = X;
+   if (Y > 0) print_settings->y_maxspeed = Y;
+   if (Z > 0) print_settings->z_maxspeed = Z;
 	return(0);
 }
 
+/*
+ * M204
+ */
 int read_accel(char* buffer, print_settings_t *print_settings){
-	double Saccel, Xaccel;
+	double Saccel, Paccel;
 	Saccel = 0;
-	Xaccel = 0;
-	read_gvalue(buffer, 'S', &Saccel);
-	read_gvalue(buffer, 'X', &Xaccel);
-	if (_MIN_(Saccel, Xaccel) > 0) print_settings->accel = _MIN_(Saccel, Xaccel);
+	Paccel = 0;
+	read_gvalue(buffer, 'S', &Saccel); //Smoothieware
+	read_gvalue(buffer, 'P', &Paccel); //Marlin
+	if (_MAX_(Saccel, Paccel) > 0) print_settings->accel = _MAX_(Saccel, Paccel); //can only S or P so whichever >0
 	return(0);
 }
 
+/*
+ * M205
+ */
 int read_jdev(char* buffer, print_settings_t *print_settings){
-	return read_gvalue(buffer, 'X', &(print_settings->jdev));
+   double Xj, Yj;
+   Xj = 0;
+   Yj = 0;
+   read_gvalue(buffer, 'X', &Xj); //Smoothieware, Marlin
+   read_gvalue(buffer, 'Y', &Yj); //Marlin
+   if (Xj > 0) print_settings->jdev = Xj;
+   if (Yj > 0 && Yj < Xj) print_settings->jdev = Yj;
+	return(0);
 }
 
+/*
+ * M220
+ */
 int read_speedover(char* buffer, print_settings_t *print_settings){
-	return read_gvalue(buffer, 'S', &(print_settings->speedoverride));
+   double S;
+	read_gvalue(buffer, 'S', &S);
+	if (S > 0) print_settings->speedoverride = S;
+	return (0);
 }
 
 //TODO:

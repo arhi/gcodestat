@@ -11,12 +11,12 @@
 #include <stdbool.h>
 
 #define LINE_BUFFER_LENGTH         4096
-#define DEFAULT_ACCELERATION       100
-#define DEFAULT_JUNCTION_DEVIATION 0.02
-#define DEFAULT_JERK               4.00
-#define DEFAULT_MAX_SPEED           100000
-#define DEFAULT_RETRACT_TIME       0.0
-#define DEFAULT_PRIME_TIME         0.0
+#define DEFAULT_ACCELERATION       1000
+#define DEFAULT_JUNCTION_DEVIATION    0.02
+#define DEFAULT_JERK                  4.00
+#define DEFAULT_MAX_SPEED        100000
+#define DEFAULT_RETRACT_TIME          0.0
+#define DEFAULT_PRIME_TIME            0.0
 
 #define GCODE_IRRELEVANT 0
 #define GCODE_MOVE       1

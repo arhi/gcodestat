@@ -116,14 +116,14 @@ int main(int argc, char** argv) {
    double next_pct = 100;
    double pct_step = 0.1;
    double heatup_time = 0.0;
-   char *apikey;
-   char *apiurl;
-   CURL *curl;
+   char *apikey = NULL;
+   char *apiurl = NULL;
+   CURL *curl = NULL;
    CURLcode res;
    curl_mime *form = NULL;
    curl_mimepart *field = NULL;
    struct curl_slist *headerlist = NULL;
-   void *chunk;
+   void *chunk = NULL;
    int alert = 0;
 
    static struct option long_options[] = {
@@ -165,6 +165,8 @@ int main(int argc, char** argv) {
    next_pct                     = 0.9;
    heatup_time                  = 0.0;
    seconds                      = heatup_time;
+   apikey                       = NULL;
+   apiurl                       = NULL;
   
    int option_index = 0;
 	int getopt_result;
@@ -525,14 +527,14 @@ int main(int argc, char** argv) {
 #ifdef _WIN32
    if (alert) {
       char ttime[128];
-      snprintf(ttime, 128, "Total Time:");
+      snprintf(ttime, 128, "Total Time: ");
 
       if ((long int) floor(seconds) > 60 * 60 * 24 * 7)
-         snprintf(ttime, 128, "%s %ld weeks, ", ttime, (long int) floor(seconds) / 60 / 60 / 24 / 7);
+         snprintf(ttime, 128, "%s%ld weeks, ", ttime, (long int) floor(seconds) / 60 / 60 / 24 / 7);
       if ((long int) floor(seconds) > 60 * 60 * 24)
-         snprintf(ttime, 128, "%s %ld days, ", ttime, ((long int) floor(seconds) / 60 / 60 / 24) % 7);
+         snprintf(ttime, 128, "%s%ld days, ", ttime, ((long int) floor(seconds) / 60 / 60 / 24) % 7);
       if ((long int) floor(seconds) > 60 * 60)
-         snprintf(ttime, 128, "%s %02ld:", ttime, ((long int) floor(seconds) / 3600) % 24);
+         snprintf(ttime, 128, "%s%02ld:", ttime, ((long int) floor(seconds) / 3600) % 24);
 
       snprintf(ttime, 128, "%s%02ld:", ttime, ((long int) floor(seconds) / 60) % 60);
       snprintf(ttime, 128, "%s%02ld ", ttime, (long int) floor(seconds) % 60);

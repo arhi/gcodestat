@@ -15,6 +15,10 @@
   #define _MIN_(a,b) (((a)<(b))?(a):(b))
 #endif
 
+#ifndef _MAX_
+  #define _MAX_(a,b) (((a)>(b))?(a):(b))
+#endif
+
 bool comment(char *);
 int gcode(char *);
 double read_dwell(char *);
