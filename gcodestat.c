@@ -1,5 +1,5 @@
 /*
- * File gcodestat.c v0.4
+ * File gcodestat.c v0.6
  * Author: arhimed@gmail.com
  * Date 20070721
  *
@@ -66,7 +66,7 @@ void print_usage() {
  * print_config(*print_settings) - print config info
  */
 void print_config(print_settings_t * ps) {
-   fprintf(stderr, "gcodestat v0.4\n");
+   fprintf(stderr, "gcodestat v0.6\n");
    fprintf(stderr, "Starting with parameters:\n");
    fprintf(stderr, "\tacceleration: \t\t%f mm/sec/sec\n", ps->accel);
    fprintf(stderr, "\tjunction deviation: \t%f\n", ps->jdev);
@@ -508,7 +508,7 @@ int main(int argc, char** argv) {
       curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headerlist);
       curl_easy_setopt(curl, CURLOPT_MIMEPOST, form);
       curl_easy_setopt(curl, CURLOPT_VERBOSE, 0L);
-      curl_easy_setopt(curl, CURLOPT_USERAGENT, "gcodestat/0.4");
+      curl_easy_setopt(curl, CURLOPT_USERAGENT, "gcodestat/0.x");
       curl_easy_setopt(curl, CURLOPT_WRITEDATA, chunk);
       curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
 

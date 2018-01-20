@@ -1,7 +1,12 @@
+CURL   := E:\Dev\eclipse-workspace\curl
+
 CC     := gcc
-CFLAGS := -Wall -Werror -IE:\Dev\eclipse-workspace\curl\include 
-LFLAGS := -LE:\Dev\eclipse-workspace\curl\lib
-LIBS   := -lm -lcurldll
+ARCH   := ${CURL}\lib\libcurl.a
+CFLAGS := -DCURL_STATICLIB -Wall -Werror -I${CURL}\include   
+LFLAGS := -L${CURL}\lib
+SLIBS  := -static -static-libgcc -lgcc -lws2_32 -lwldap32 #-lpthread -static-libstdc++ -lstdc++
+LIBS   := -lm -lcurl
+
 
 SRCS   := gcodestat.c calcmove.c readconfig.c readgcode.c
 HFILES := gcodestat.h calcmove.h readconfig.h readgcode.h
@@ -13,10 +18,11 @@ PROGS  := gcodestat.exe
 all: ${PROGS}
 
 ${PROGS}: ${OBJS} Makefile
-	${CC} ${OBJS} ${LFLAGS} ${LIBS} -g -o $@ 
+	${CC}  ${OBJS} ${ARCH} ${LFLAGS} ${SLIBS} ${LIBS} -g -o $@ 
 
 clean:
 	rm -f ${PROGS} ${OBJS}
+	${CC} --version
 
 %.o: %.c Makefile
 	${CC} ${CFLAGS} -g -c $<
