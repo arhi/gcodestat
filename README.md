@@ -105,10 +105,12 @@ for %%a in (%1) do (
 set if=%filepath%%filename%%extension%
 set of=%filepath%%filename%_M117%extension%
 
-E:\Dev\eclipse-workspace\gcodestat\gcodestat.exe -d 0.02 -a 1000 --gcode="%if%" --output="%of%" | c:\Windows\System32\msg.exe %username%
+E:\Dev\eclipse-workspace\gcodestat\gcodestat.exe -d 0.02 -a 1000 --alert --gcode="%if%" --output="%of%" --api_key=YOUROCTOPRINTAPIKEY --api_url="http://192.168.0.1/api/files/local" 
+
 ```
 
-you can even add curl to shoot the %of% directly to octoprint (as in gs.bat that's part of the code), or some SED/AWK to do some search/replace etc etc.. 
+ --alert will display the windows alert showing time to print
+ --api_key & --api_url if set will upload the file to the octoprint (finally you can send to octoprint from simplify3d)
 
 and then put in the "Scripts" tab, "additional terminal commands for postprocessing" a line that call's it:
 
@@ -116,8 +118,13 @@ and then put in the "Scripts" tab, "additional terminal commands for postprocess
 e:\path\to\gcodestat\gs.bat "[output_filepath]" 
 ```
 
+Note that if you don't have --output and you have api_key and api_url the input file will be uploaded to octoprint, but if you have --output then the output file will be the one being uploaded.
+
+One good side effect of this is that finally your API key will not be embedded in the g-code (if you used curl in the additional post processing script to upload to octoprint) so a little bit security there :)
+
 if you don't want the windows popup to show you time left you can add -q or --quiet so you suppress any output
 
 the M117 file you create, even if you don't have a LCD on your printer and you use Octoprint as a host you can use some of the Octoprint plugins to display M117 messages in browser during print, for e.g.
 https://github.com/AmedeeBulle/StatusLine
 https://github.com/jneilliii/OctoPrint-M117PopUp
+
