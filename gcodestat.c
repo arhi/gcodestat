@@ -1,5 +1,5 @@
 /*
- * File gcodestat.c v0.6
+ * File gcodestat.c v0.7
  * Author: arhimed@gmail.com
  * Date 20070721
  *
@@ -66,7 +66,7 @@ void print_usage() {
  * print_config(*print_settings) - print config info
  */
 void print_config(print_settings_t * ps) {
-   fprintf(stderr, "gcodestat v0.6\n");
+   fprintf(stderr, "gcodestat v0.7\n");
    fprintf(stderr, "Starting with parameters:\n");
    fprintf(stderr, "\tacceleration: \t\t%f mm/sec/sec\n", ps->accel);
    fprintf(stderr, "\tjunction deviation: \t%f\n", ps->jdev);

@@ -53,25 +53,37 @@ double calcmove(char * buffer,  print_settings_t * print_settings){
   e = olde;
 
   while('\0' != (c = *(buff++)) ){
+    bool endofline;
+    endofline = false;
     if ((c & 0xDF) == 'G'){
       while('\0' != (c = *(buff++)) ){
-        switch (c & 0xDF){
+        switch (c){
           case 'X':
+          case 'x':
             x = atof(buff++);
             break;
           case 'Y':
+          case 'y':
             y = atof(buff++);
             break;
           case 'Z':
+          case 'z':
             z = atof(buff++);
             break;
           case 'E':
+          case 'e':
             e = atof(buff++);
             break;
           case 'F':
+          case 'f':
             f = atof(buff++)/60.0; //convert speed to units/second from units/minute
             break;
+          case ';':
+          case '\n':
+          case '\r':
+            endofline = true;
         }
+        if (endofline) break;
       }
       break;
     }
