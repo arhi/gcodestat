@@ -128,3 +128,6 @@ the M117 file you create, even if you don't have a LCD on your printer and you u
 https://github.com/AmedeeBulle/StatusLine
 https://github.com/jneilliii/OctoPrint-M117PopUp
 
+
+# OctoPrint
+If you are using OctoPrint I wrote a plugin [gcodestatEstimator](https://github.com/arhi/OctoPrint-gcodestatEstimator) that will use the M117 codes embedded by the gcodestat to inform OctoPrint about "real" time to finish the print
