@@ -128,6 +128,22 @@ the M117 file you create, even if you don't have a LCD on your printer and you u
 https://github.com/AmedeeBulle/StatusLine
 https://github.com/jneilliii/OctoPrint-M117PopUp
 
+Since v0.8 there is --m117_format option, if option is not set it behaves like you called it with
+
+`--m117_format "M117 %p%% Remaining %w weeks %d days ( %h:%m:%s )"`
+
+available substitutions are:
+ %w - number of weeks
+ %d - number of days
+ %h - number of hours
+ %m - number of minutes
+ %s - number of seconds
+ %S - number of seconds + minutes * 60 + hours * 60 * 60 + days * 60 * 60 * 24 + weeks * ...
+ %p - percentage
+ %% - a % sign
+ %q - a " sign
+
+ **Note: gcodestat will not auto add M117 (case sensitive!) so you have to add it to format string yourself**
 
 # OctoPrint
 If you are using OctoPrint I wrote a plugin [gcodestatEstimator](https://github.com/arhi/OctoPrint-gcodestatEstimator) that will use the M117 codes embedded by the gcodestat to inform OctoPrint about "real" time to finish the print
