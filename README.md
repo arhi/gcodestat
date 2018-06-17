@@ -147,7 +147,13 @@ available substitutions are (case sensitive):
 
  **Note: gcodestat will not auto add M117 (case sensitive!) so you have to add it to format string yourself**
 
-
+examples:
+```
+--m117_format "M117 %p%% Remaining %w weeks %d days ( %h:%m:%s )"
+--m117_format "M117 %p%% Remaining"
+--m117_format "M117 %S sec remaining"
+--m117_format "M117 %w:%d:%h:%m:%s"
+```
 
 # OctoPrint
 If you are using OctoPrint I wrote a plugin [gcodestatEstimator](https://github.com/arhi/OctoPrint-gcodestatEstimator) that will use the M117 codes embedded by the gcodestat to inform OctoPrint about "real" time to finish the print
