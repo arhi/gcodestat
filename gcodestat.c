@@ -56,10 +56,10 @@ void print_usage() {
    fprintf(stderr, "\t-r, --retract_time %f\t\tRetraction time in sec\n", DEFAULT_RETRACT_TIME);
    fprintf(stderr, "\t-p, --prime_time %f\t\tPrime time in sec\n", DEFAULT_PRIME_TIME);
    fprintf(stderr, "\t-s, --percent_step 10\t\t\tChange LCD data every ##%%\n");
+   fprintf(stderr, "\t-m, --m117_format <format> \t\tformat to write M117 as, e.g.\n\t\t\t\t\t\t\"M117 %%w weeks, %%d days (%%h:%%m:%%s) %%p%%%% remaining\"\n\t\t\t\t\t\t\"M117 %%S seconds to go\"\n");
    fprintf(stderr, "\nOctoPrint settings\n\t\t(if output file set it will be uploaded to octoprint\n\t\tif not the input file will be uploaded)\n\n");
    fprintf(stderr, "\t-k, --api_key \t\t\t\tOctoprint API key\n");
-   fprintf(stderr, "\t-u, --api_url \t\t\t\tOctoprint API URI (e.g. http://octoprint/api/files/local )\n");
-   fprintf(stderr, "\t-m, --m117_format <format> \t\tformat to write M117 as, e.g. \"M117 %%w weeks, %%d days (%%h:%%m:%%s) %%p%%%% remaining\" or \"M117 %%S seconds to go\"\n");
+   fprintf(stderr, "\t-u, --api_url \t\t\t\tOctoprint API URI (e.g. http://octopi.local/api/files/local )\n");
    fprintf(stderr, "\n\n");
    return;
 }
