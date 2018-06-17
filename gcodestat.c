@@ -1,5 +1,5 @@
 /*
- * File gcodestat.c v0.7
+ * File gcodestat.c v0.8
  * Author: arhimed@gmail.com
  * Date 20070721
  *
@@ -11,7 +11,8 @@
 #define _CLEANUP_ {if (gcodefile != NULL) free(gcodefile); \
                    if (gcodeout != NULL) free(gcodeout); \
                    if (apiurl != NULL) free(apiurl); \
-                   if (apikey!=NULL) free(apikey);\
+                   if (apikey!=NULL) free(apikey); \
+                   if (m117format!=NULL) free(m117format); \
                   }
 
 #include <stdio.h>
@@ -58,6 +59,7 @@ void print_usage() {
    fprintf(stderr, "\nOctoPrint settings\n\t\t(if output file set it will be uploaded to octoprint\n\t\tif not the input file will be uploaded)\n\n");
    fprintf(stderr, "\t-k, --api_key \t\t\t\tOctoprint API key\n");
    fprintf(stderr, "\t-u, --api_url \t\t\t\tOctoprint API URI (e.g. http://octoprint/api/files/local )\n");
+   fprintf(stderr, "\t-m, --m117_format <format> \t\tformat to write M117 as, e.g. \"M117 %%w weeks, %%d days (%%h:%%m:%%s) %%p%%%% remaining\" or \"M117 %%S seconds to go\"\n");
    fprintf(stderr, "\n\n");
    return;
 }
@@ -66,7 +68,7 @@ void print_usage() {
  * print_config(*print_settings) - print config info
  */
 void print_config(print_settings_t * ps) {
-   fprintf(stderr, "gcodestat v0.7\n");
+   fprintf(stderr, "gcodestat v0.8\n");
    fprintf(stderr, "Starting with parameters:\n");
    fprintf(stderr, "\tacceleration: \t\t%f mm/sec/sec\n", ps->accel);
    fprintf(stderr, "\tjunction deviation: \t%f\n", ps->jdev);
@@ -83,6 +85,32 @@ void print_config(print_settings_t * ps) {
    return;
 }
 
+// copied function somewhere from the vast internet
+char *str_replace(char *orig, char *rep, char *with) {
+    char *result, *ins, *tmp;
+    int len_rep, len_with, len_front, count;
+
+    if (!orig || !rep) return NULL;
+    if ((len_rep = strlen(rep)) == 0)  return NULL;
+    if (!with) with = "";
+    len_with = strlen(with);
+
+    ins = orig;
+    for (count = 0; (tmp = strstr(ins, rep)); ++count) ins = tmp + len_rep;
+    tmp = result = malloc(strlen(orig) + (len_with - len_rep) * count + 1);
+    if (!result) return NULL;
+
+    while (count--) {
+        ins = strstr(orig, rep);
+        len_front = ins - orig;
+        tmp = strncpy(tmp, orig, len_front) + len_front;
+        tmp = strcpy(tmp, with) + len_with;
+        orig += len_front + len_rep;
+    }
+    strcpy(tmp, orig);
+    return result;
+}
+
 void print_timeleft(FILE* f, long int sec){
     fprintf(f, "( ");
     if (sec > 60*60*24*7) fprintf(f, "%ld weeks, ", sec / 60 / 60 / 24 / 7);
@@ -90,6 +118,91 @@ void print_timeleft(FILE* f, long int sec){
     if (sec > 60*60     ) fprintf(f, "%02ld:"     , (sec / 3600) %24);
     fprintf(f, "%02ld:"                           , (sec / 60) % 60);
     fprintf(f, "%02ld )"                          ,  sec % 60);
+}
+
+void print_timeleft_f(FILE* f, char * sformat, long int sec, int pct){
+  int week, day, hour, minute, second;
+  char sweek[4], sday[2], shour[3], sminute[3], ssecond[3], sSec[64], spct[4];
+  char *stringtowrite = NULL;
+  char *tmp;
+
+  if (sformat == NULL) return;
+  if (pct == 0) return;
+  if (sec == 0) return;
+
+  week =    sec / 60 / 60 / 24 / 7;   // %w
+  day  =   (sec / 60 / 60 / 24) % 7;  // %d
+  hour =   (sec / 3600) %24;          // %h
+  minute = (sec / 60) % 60;           // %m
+  second =  sec % 60;                 // %s
+
+  snprintf(sweek,   4, "%i", week);
+  snprintf(sday,    2, "%i", day );
+  snprintf(shour,   3, "%02i", hour);
+  snprintf(sminute, 3, "%02i", minute);
+  snprintf(ssecond, 3, "%02i", second);
+  snprintf(sSec,   64, "%lu", sec);
+  snprintf(spct,    4, "%i", pct);
+
+  tmp = str_replace(sformat, "%w", sweek );
+  if (tmp != NULL) {
+     stringtowrite = strdup (tmp);
+     free(tmp);
+  }
+  tmp = str_replace(stringtowrite, "%d", sday );
+  if (tmp != NULL) {
+     free(stringtowrite);
+     stringtowrite = strdup (tmp);
+     free(tmp);
+  }
+  tmp = str_replace(stringtowrite, "%h", shour );
+  if (tmp != NULL) {
+     free(stringtowrite);
+     stringtowrite = strdup (tmp);
+     free(tmp);
+  }
+  tmp = str_replace(stringtowrite, "%m", sminute );
+  if (tmp != NULL) {
+     free(stringtowrite);
+     stringtowrite = strdup (tmp);
+     free(tmp);
+  }
+  tmp = str_replace(stringtowrite, "%s", ssecond );
+  if (tmp != NULL) {
+     free(stringtowrite);
+     stringtowrite = strdup (tmp);
+     free(tmp);
+  }
+  tmp = str_replace(stringtowrite, "%S", sSec );
+  if (tmp != NULL) {
+     free(stringtowrite);
+     stringtowrite = strdup (tmp);
+     free(tmp);
+  }
+  tmp = str_replace(stringtowrite, "%q", "\"" );
+  if (tmp != NULL) {
+     free(stringtowrite);
+     stringtowrite = strdup (tmp);
+     free(tmp);
+  }
+  tmp = str_replace(stringtowrite, "%%", "%" );
+  if (tmp != NULL) {
+     free(stringtowrite);
+     stringtowrite = strdup (tmp);
+     free(tmp);
+  }
+  tmp = str_replace(stringtowrite, "%p", spct );
+  if (tmp != NULL) {
+     free(stringtowrite);
+     stringtowrite = strdup (tmp);
+     free(tmp);
+  }
+
+  if (stringtowrite != NULL) {
+     fputs(stringtowrite, f);
+     fputs("\n", f);
+     free(stringtowrite);
+  }
 }
 
 
@@ -108,6 +221,7 @@ int main(int argc, char** argv) {
    char *lb = NULL;
    char *gcodefile = NULL;
    char *gcodeout = NULL;
+   char *m117format = NULL;
    double seconds = 0;
    double total_seconds = 0;
    print_settings_t print_settings;
@@ -140,11 +254,13 @@ int main(int argc, char** argv) {
       {"max_x_speed", required_argument, NULL, 'x'},
       {"max_y_speed", required_argument, NULL, 'y'},
       {"max_z_speed", required_argument, NULL, 'z'},
+      {"max_feed", required_argument, NULL, 'f'},
       {"retract_time", required_argument, NULL, 'r'},
       {"prime_time", required_argument, NULL, 'p'},
       {"percent_step", required_argument, NULL, 's'},
       {"api_url", required_argument, NULL, 'u'},
       {"api_key", required_argument, NULL, 'k'},
+      {"m117_format", required_argument, NULL, 'm'},
       {NULL, 0, NULL, 0}
    };
 
@@ -182,6 +298,9 @@ int main(int argc, char** argv) {
 			break;
       case 'w':
          alert = 1;
+         break;
+      case 'm':
+         m117format = strdup(optarg);
          break;
 		case 'g':
 			if (optarg) {
@@ -369,6 +488,7 @@ int main(int argc, char** argv) {
 		}
 	}
 
+	if (m117format == NULL) m117format = strdup("M117 %p%% Remaining %w weeks %d days ( %h:%m:%s )");
    if (gcodefile == NULL)
       gcodefile = strdup("samples/test.gcode");
 
@@ -403,18 +523,20 @@ int main(int argc, char** argv) {
          rewind(f);
          total_seconds = seconds;
          seconds = heatup_time;
-         fprintf(output_file, "M117 100%% Remaining ");
-         print_timeleft(output_file, (long int) floor(total_seconds));
-         fprintf(output_file, "\n");
+         //fprintf(output_file, "M117 100%% Remaining ");
+         //print_timeleft(output_file, (long int) floor(total_seconds));
+         //fprintf(output_file, "\n");
+         print_timeleft_f(output_file, m117format, (long int) floor(total_seconds), 100);
 
       }
       while (fgets(lb, LINE_BUFFER_LENGTH, f)) {
          if (pass == 1) {
             fputs(lb, output_file);
             if (next_pct > 0.01 && (total_seconds - seconds) / total_seconds < next_pct) {
-               fprintf(output_file, "M117 %i%% Remaining ", (int) floor(next_pct * 100));
-               print_timeleft(output_file, (long int) floor(total_seconds - seconds));
-               fprintf(output_file, "\n");
+               //fprintf(output_file, "M117 %i%% Remaining ", (int) floor(next_pct * 100));
+               //print_timeleft(output_file, (long int) floor(total_seconds - seconds));
+               //fprintf(output_file, "\n");
+               print_timeleft_f(output_file, m117format, (long int) floor(total_seconds - seconds), (int) floor(next_pct * 100));
                next_pct -= pct_step;
             }
          }
@@ -477,6 +599,7 @@ int main(int argc, char** argv) {
    if (!quiet) {
       fprintf(stdout, "Total time: ");
       print_timeleft(stdout, (long int) floor(seconds));
+      //print_timeleft_f(stdout, m117format, (long int) floor(total_seconds - seconds), (int) floor(next_pct * 100));
       fprintf(stdout, "\n");
    }
 
@@ -484,6 +607,7 @@ int main(int argc, char** argv) {
       fprintf(output_file, ";\n; gcodestat\n;  https://github.com/arhi/gcodestat\n");
       fprintf(output_file, ";  Total print time ");
       print_timeleft(output_file, (long int) floor(seconds));
+      //print_timeleft_f(output_file, m117format, (long int) floor(total_seconds - seconds), (int) floor(next_pct * 100));
       fprintf(output_file, "\n;\n");
       fclose(output_file);
    }
