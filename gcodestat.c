@@ -1,5 +1,5 @@
 /*
- * File gcodestat.c v0.8
+ * File gcodestat.c v0.9
  * Author: arhimed@gmail.com
  * Date 20070721
  *
@@ -68,7 +68,7 @@ void print_usage() {
  * print_config(*print_settings) - print config info
  */
 void print_config(print_settings_t * ps) {
-   fprintf(stderr, "gcodestat v0.8\n");
+   fprintf(stderr, "gcodestat v0.9\n");
    fprintf(stderr, "Starting with parameters:\n");
    fprintf(stderr, "\tacceleration: \t\t%f mm/sec/sec\n", ps->accel);
    fprintf(stderr, "\tjunction deviation: \t%f\n", ps->jdev);
@@ -286,7 +286,7 @@ int main(int argc, char** argv) {
   
    int option_index = 0;
 	int getopt_result;
-	while ((getopt_result = getopt_long(argc, argv, "q?hwg:c:a:d:j:x:y:z:r:p:o:s:t:u:k:", long_options, &option_index)) != -1) {
+	while ((getopt_result = getopt_long(argc, argv, "q?hwg:c:a:d:j:x:y:z:r:p:o:s:t:u:k:m:", long_options, &option_index)) != -1) {
 		switch (getopt_result) {
 		case 'q':
 			quiet = true;
