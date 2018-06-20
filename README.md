@@ -155,5 +155,20 @@ examples:
 --m117_format "M117 %w:%d:%h:%m:%s"
 ```
 
+ **Note: % is special char in a BAT file so when adding this to a .bat file you have to use %% instead of % so windows batch interpreter can work properly. Here's an example bat file with M117 format:**
+```
+@echo off
+for %%a in (%1) do (
+    set filepath=%%~dpa
+    set filename=%%~na
+    set extension=%%~xa
+)   
+set if=%filepath%%filename%%extension%
+set of=%filepath%%filename%_M117%extension%
+
+C:\gcodestat\gcodestat.exe -d 0.02 -a 1000 --alert --gcode="%if%" --output="%of%" --api_key=YOUROCTOPRINTAPIKEY --api_url="http://octopi.local/api/files/local" --m117_format "M117 %%p%%%% Remaining %%w weeks %%d days ( %%h:%%m:%%s )"
+
+``` 
+ 
 # OctoPrint
 If you are using OctoPrint I wrote a plugin [gcodestatEstimator](https://github.com/arhi/OctoPrint-gcodestatEstimator) that will use the M117 codes embedded by the gcodestat to inform OctoPrint about "real" time to finish the print
