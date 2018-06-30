@@ -56,7 +56,10 @@ void print_usage() {
    fprintf(stderr, "\t-d, --junction_deviation %f\tDefault Junction Deviation\n", DEFAULT_JUNCTION_DEVIATION);
    fprintf(stderr, "\t-j, --jerk %f\t\t\tDefault jerk\n", DEFAULT_JERK);
    fprintf(stderr, "\t-6, --heatup_time 0\t\t\tConstant time to add to result (seconds)\n");
-   fprintf(stderr, "\t-f, --max_feed %d\t\t\tMax feed\n", DEFAULT_MAX_SPEED);
+   fprintf(stderr, "\t-f, --max_feed %d\t\t\tMax feed in mm/min\n", DEFAULT_MAX_SPEED);
+   fprintf(stderr, "\t-x, --max_x_speed %d\t\t\tMax x speed in mm/min\n", DEFAULT_MAX_SPEED);
+   fprintf(stderr, "\t-y, --max_y_speed %d\t\t\tMax y speed in mm/min\n", DEFAULT_MAX_SPEED);
+   fprintf(stderr, "\t-z, --max_z_speed %d\t\t\tMax z speed in mm/min\n", DEFAULT_MAX_SPEED);
    fprintf(stderr, "\t-r, --retract_time %f\t\tRetraction time in sec\n", DEFAULT_RETRACT_TIME);
    fprintf(stderr, "\t-p, --prime_time %f\t\tPrime time in sec\n", DEFAULT_PRIME_TIME);
    fprintf(stderr, "\t-s, --percent_step 10\t\t\tChange LCD data every ##%%\n");

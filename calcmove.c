@@ -23,13 +23,14 @@ double calcmove(char * buffer,  print_settings_t * print_settings){
   static double oldy = 0;
   static double oldz = 0;
   static double olde = 0;
-  static double oldf = 0;
+  static double oldf = 1;        //default feed rate = 1 overriden by first F in the code, //TODO: should be set from config, not hardcoded
 
   static double oldxa    = 0;    //vector of previous movement
   static double oldya    = 0;
   static double oldza    = 0;
 
   static double oldspeed = 0;    //speed previous move ended (start speed for current move)
+
 
   double ret;
   double distance;
@@ -125,8 +126,8 @@ double calcmove(char * buffer,  print_settings_t * print_settings){
 				speed = _MIN_(speed, sqrt( print_settings->accel * print_settings->jdev * sin_theta_d2 / (1.0 - sin_theta_d2)));
 			}
 		}
-		speed = _MIN_(speed, print_settings->x_maxspeed);
-		speed = _MIN_(speed, print_settings->y_maxspeed);
+		speed = _MIN_(speed, print_settings->x_maxspeed /60.0);
+		speed = _MIN_(speed, print_settings->y_maxspeed /60.0);
 
 		Ta = (f - oldspeed) / print_settings->accel; // time to reach speed from start speed (end speed of previous move)
 		Td = (f - speed) / print_settings->accel; // time to decelerate to "end speed" of current movement
