@@ -24,7 +24,11 @@
 #include <math.h>
 #include <malloc.h>
 #include <sys/time.h>
+
+#ifndef NOCURL
 #include <curl/curl.h>
+#endif
+
 #ifdef _WIN32
 #include <windows.h>
 #endif
@@ -57,9 +61,11 @@ void print_usage() {
    fprintf(stderr, "\t-p, --prime_time %f\t\tPrime time in sec\n", DEFAULT_PRIME_TIME);
    fprintf(stderr, "\t-s, --percent_step 10\t\t\tChange LCD data every ##%%\n");
    fprintf(stderr, "\t-m, --m117_format <format> \t\tformat to write M117 as, e.g.\n\t\t\t\t\t\t\"M117 %%w weeks, %%d days (%%h:%%m:%%s) %%p%%%% remaining\"\n\t\t\t\t\t\t\"M117 %%S seconds to go\"\n");
+#ifndef NOCURL
    fprintf(stderr, "\nOctoPrint settings\n\t\t(if output file set it will be uploaded to octoprint\n\t\tif not the input file will be uploaded)\n\n");
    fprintf(stderr, "\t-k, --api_key \t\t\t\tOctoprint API key\n");
    fprintf(stderr, "\t-u, --api_url \t\t\t\tOctoprint API URI (e.g. http://octopi.local/api/files/local )\n");
+#endif
    fprintf(stderr, "\n\n");
    return;
 }
@@ -205,12 +211,12 @@ void print_timeleft_f(FILE* f, char * sformat, long int sec, int pct){
   }
 }
 
-
+#ifndef NOCURL
 static size_t WriteMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp) {
    size_t realsize = size * nmemb;
    return realsize;
 }
-
+#endif
 
 /*
  * main
@@ -232,13 +238,18 @@ int main(int argc, char** argv) {
    double heatup_time = 0.0;
    char *apikey = NULL;
    char *apiurl = NULL;
+#ifndef NOCURL
    CURL *curl = NULL;
    CURLcode res;
    curl_mime *form = NULL;
    curl_mimepart *field = NULL;
    struct curl_slist *headerlist = NULL;
    void *chunk = NULL;
+#endif
+
+#ifdef _WIN32
    int alert = 0;
+#endif
 
    static struct option long_options[] = {
       {"help", no_argument, NULL, 'h'},
@@ -297,7 +308,9 @@ int main(int argc, char** argv) {
 			return (-1);
 			break;
       case 'w':
+#ifdef _WIN32
          alert = 1;
+#endif
          break;
       case 'm':
          m117format = strdup(optarg);
@@ -612,6 +625,7 @@ int main(int argc, char** argv) {
       fclose(output_file);
    }
 
+#ifndef NOCURL
    curl_global_init(CURL_GLOBAL_ALL);
    curl = curl_easy_init();
    if (curl && apikey && apiurl) {
@@ -647,6 +661,7 @@ int main(int argc, char** argv) {
       curl_mime_free(form);
       curl_slist_free_all(headerlist);
    }
+#endif
 
 #ifdef _WIN32
    if (alert) {

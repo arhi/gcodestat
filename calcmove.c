@@ -117,7 +117,7 @@ double calcmove(char * buffer,  print_settings_t * print_settings){
   } else {
 	  //SMOOTHIEWARE - JUNCTION DEVIATION & ACCELERATION
 
-		costheta = (xa * oldxa + ya * oldya + za + oldza) / (sqrt(xa * xa + ya * ya + za * za) * sqrt(oldxa * oldxa + oldya * oldya + oldza * oldza));
+		costheta = (xa * oldxa + ya * oldya + za * oldza) / (sqrt(xa * xa + ya * ya + za * za) * sqrt(oldxa * oldxa + oldya * oldya + oldza * oldza));
 		if (costheta < 0.95) {
 			speed = f;
 			if (costheta > -0.95F) {

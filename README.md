@@ -9,7 +9,47 @@ There are some sample gcode's in the samples directory along with a sample confi
 
 Not everything is taken into account for now. For example if you use firmware retraction/prime feature those are ignored, temperature reaching time is also ignored etc.. 
 
-example:
+# building
+clone the git and make
+
+## for windows using gcc
+
+Edit Makefile and modify CURL variable to where you have your CURL libs installed or add "CURL=C:\where\you\have\curl\library\installed" after make command
+
+This will create a static binary that does not require external libs:
+
+ make 
+
+Or you can do this to build binary that will require gcc runtime dll's
+
+ make STATIC=0
+
+Or if you do not want CURL libraries used (required if you want to upload result to octoprint) do
+
+ make NOCURL=1
+
+Or you can combine
+
+ make NOCURL=1 STATIC=0
+
+## for windows using other C compiler 
+
+have not tried, if you do please lemme know :)
+
+## for linux (e.g. if you are building on raspberry pi or orange pi)
+
+You will want dynamic build on the linux, and you doubtfully want curl on rpi itself so build with:
+
+ make STATIC=0 NOCURL=1
+
+Now if you want curl, make sure you have curl libs 7.57 or newer installed (note default armbian on opi comes with 7.38 that's old and won't work so you have to add newer curl lib manually) then this should work
+
+ make STATIC=0
+
+
+
+
+# usage example:
 
 ```
 e:\Dev\eclipse-workspace\gcodestat>gcodestat.exe -c samples\config.txt -g samples\31min17sec.gcode
