@@ -1,7 +1,14 @@
 NOCURL := 0
-STATIC := 1
+STATIC := 1  
+UNAME := $(shell uname)
 
-CURL   := E:\Dev\eclipse-workspace\curl
+ifeq ($(UNAME),Darwin) #Mac OS
+  NOCURL := 1
+  STATIC := 0
+
+endif
+
+CURL   := /usr/bin/curl
 
 CC     := gcc
 ARCH   := ${CURL}\lib\libcurl.a
