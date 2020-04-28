@@ -5,7 +5,6 @@ UNAME := $(shell uname)
 ifeq ($(UNAME),Darwin) #Mac OS
   NOCURL := 1
   STATIC := 0
-
 endif
 
 CURL   := /usr/bin/curl
