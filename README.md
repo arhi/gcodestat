@@ -54,7 +54,7 @@ Now if you want curl, make sure you have curl libs 7.57 or newer installed (note
 # usage example:
 On linux:
 ```
-~$ gcodestat -g out.nc -Q
+~$ gcodestat out.nc -Q
 681
 ```
 ```

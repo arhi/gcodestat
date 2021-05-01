@@ -304,6 +304,11 @@ int main(int argc, char** argv) {
   
    int option_index = 0;
 	int getopt_result;
+	if(argc > 1) {
+        if(argv[1][0] != '-') {
+            gcodefile = strdup(argv[1]);
+        }
+	}
 	while ((getopt_result = getopt_long(argc, argv, "Qq?hwg:c:a:d:j:x:y:z:r:p:o:s:t:u:k:m:", long_options, &option_index)) != -1) {
 		switch (getopt_result) {
 		case 'q':
