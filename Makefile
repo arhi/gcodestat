@@ -23,8 +23,10 @@ CURLIB := -lcurl
 SRCS   := gcodestat.c calcmove.c readconfig.c readgcode.c
 HFILES := gcodestat.h calcmove.h readconfig.h readgcode.h
 
-OBJS   := ${SRCS:.c=.o} 
-PROGS  := gcodestat.exe
+OBJS   := ${SRCS:.c=.o}
+NAME   := gcodestat
+PROGS  := ${NAME}.exe
+BIN    := /usr/bin/${NAME}
 
 .PHONY: all
 all: ${PROGS}  
@@ -37,8 +39,8 @@ else
 endif
 
 install:
-	sudo cp ${PROGS} /usr/bin
-	sudo mv /usr/bin/${PROGS} /usr/bin/gcodestat
+	sudo cp ${PROGS} ${NAME}
+	sudo mv ${NAME} ${BIN}
 
 
 clean:
