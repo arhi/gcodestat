@@ -36,6 +36,11 @@ else
 	${CC}  ${OBJS} ${ARCH} ${LFLAGS} ${SLIBS} ${LIBS} ${CURLIB} -g -o $@ 
 endif
 
+install:
+	sudo cp ${PROGS} /usr/bin
+	sudo mv /usr/bin/${PROGS} /usr/bin/gcodestat
+
+
 clean:
 	rm -f ${PROGS} ${OBJS}
 	${CC} --version
