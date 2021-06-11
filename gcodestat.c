@@ -566,7 +566,7 @@ int main(int argc, char** argv) {
                //fprintf(output_file, "M117 %i%% Remaining ", (int) floor(next_pct * 100));
                //print_timeleft(output_file, (long int) floor(total_seconds - seconds));
                //fprintf(output_file, "\n");
-               print_timeleft_f(output_file, m117format, (long int) floor(total_seconds - seconds), (int) floor(next_pct * 100));
+               print_timeleft_f(output_file, m117format, (long int) floor(total_seconds - seconds), (int) ceill(next_pct * 100));
                next_pct -= pct_step;
             }
          }
