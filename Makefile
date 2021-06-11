@@ -23,8 +23,10 @@ CURLIB := -lcurl
 SRCS   := gcodestat.c calcmove.c readconfig.c readgcode.c
 HFILES := gcodestat.h calcmove.h readconfig.h readgcode.h
 
-OBJS   := ${SRCS:.c=.o} 
-PROGS  := gcodestat.exe
+OBJS   := ${SRCS:.c=.o}
+NAME   := gcodestat
+PROGS  := ${NAME}.exe
+BIN    := /usr/bin/${NAME}
 
 .PHONY: all
 all: ${PROGS}  
@@ -35,6 +37,11 @@ ifeq ($(NOCURL),1)
 else
 	${CC}  ${OBJS} ${ARCH} ${LFLAGS} ${SLIBS} ${LIBS} ${CURLIB} -g -o $@ 
 endif
+
+install:
+	sudo cp ${PROGS} ${NAME}
+	sudo mv ${NAME} ${BIN}
+
 
 clean:
 	rm -f ${PROGS} ${OBJS}
