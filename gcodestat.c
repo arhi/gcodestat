@@ -22,7 +22,14 @@
 #include <string.h>
 #include <stdbool.h>
 #include <math.h>
-#include <malloc.h>
+
+#ifdef __APPLE__ 
+  #include <stdlib.h>
+#else
+  #include <malloc.h>
+#endif
+
+#include <stdlib.h>
 #include <sys/time.h>
 
 #ifndef NOCURL
