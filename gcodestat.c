@@ -23,13 +23,10 @@
 #include <stdbool.h>
 #include <math.h>
 
-#ifdef __APPLE__ 
-  #include <stdlib.h>
-#else
-  #include <malloc.h>
+#ifndef __APPLE__
+#include <malloc.h>
 #endif
 
-#include <stdlib.h>
 #include <sys/time.h>
 
 #ifndef NOCURL
@@ -53,7 +50,6 @@ void print_usage() {
    fprintf(stderr, "\t-h, --help\t\t\t\tshow help\n");
    fprintf(stderr, "\t-?, --help\t\t\t\tshow help\n");
    fprintf(stderr, "\t-q, --quiet\t\t\t\tsuppress any output\n");
-   fprintf(stderr, "\t-Q  --show-time\t\t\t\toutput result time\n");
 #ifdef _WIN32
    fprintf(stderr, "\t-w, --alert\t\t\t\tdisplay windows alert with total time\n");
 #endif
@@ -242,8 +238,7 @@ int main(int argc, char** argv) {
    double seconds = 0;
    double total_seconds = 0;
    print_settings_t print_settings;
-   bool quiet = false,
-        show_time = false;
+   bool quiet = false;
    int pass;
    double next_pct = 100;
    double pct_step = 0.1;
@@ -266,7 +261,6 @@ int main(int argc, char** argv) {
    static struct option long_options[] = {
       {"help", no_argument, NULL, 'h'},
       {"quiet", no_argument, NULL, 'q'},
-      {"show_time", no_argument, NULL, 'Q'},
       {"alert", no_argument, NULL, 'w'},
 	   {"gcode", required_argument, NULL, 'g'},
       {"output", required_argument, NULL, 'o'},
@@ -302,7 +296,6 @@ int main(int argc, char** argv) {
    print_settings.jerk          = false;                       // default we use junction deviation
    print_settings.speedoverride = 1.0;
    quiet                        = false;
-   show_time                    = true;
    next_pct                     = 0.9;
    heatup_time                  = 0.0;
    seconds                      = heatup_time;
@@ -311,20 +304,10 @@ int main(int argc, char** argv) {
   
    int option_index = 0;
 	int getopt_result;
-	if(argc > 1) {
-        if(argv[1][0] != '-') {
-            gcodefile = strdup(argv[1]);
-        }
-	}
-	while ((getopt_result = getopt_long(argc, argv, "Qq?hwg:c:a:d:j:x:y:z:r:p:o:s:t:u:k:m:", long_options, &option_index)) != -1) {
+	while ((getopt_result = getopt_long(argc, argv, "q?hwg:c:a:d:j:x:y:z:r:p:o:s:t:u:k:m:", long_options, &option_index)) != -1) {
 		switch (getopt_result) {
 		case 'q':
 			quiet = true;
-			show_time = false;
-			break;
-		case 'Q':
-		    quiet = true;
-			show_time = true;
 			break;
 		case 'h':
 		case '?':
@@ -573,7 +556,7 @@ int main(int argc, char** argv) {
                //fprintf(output_file, "M117 %i%% Remaining ", (int) floor(next_pct * 100));
                //print_timeleft(output_file, (long int) floor(total_seconds - seconds));
                //fprintf(output_file, "\n");
-               print_timeleft_f(output_file, m117format, (long int) floor(total_seconds - seconds), (int) ceill(next_pct * 100));
+               print_timeleft_f(output_file, m117format, (long int) floor(total_seconds - seconds), (int) floor(next_pct * 100));
                next_pct -= pct_step;
             }
          }
@@ -638,8 +621,6 @@ int main(int argc, char** argv) {
       print_timeleft(stdout, (long int) floor(seconds));
       //print_timeleft_f(stdout, m117format, (long int) floor(total_seconds - seconds), (int) floor(next_pct * 100));
       fprintf(stdout, "\n");
-   } else if (show_time) {
-      fprintf(stdout, "%lu\n", (long int) floor(seconds));
    }
 
    if (output_file != NULL) {
