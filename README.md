@@ -49,6 +49,12 @@ Now if you want curl, make sure you have curl libs 7.57 or newer installed (note
  make STATIC=0
 ```
 
+## for osx (m1 or x86)
+
+
+```
+make STATIC=0 NOCURL=1
+```
 
 
 # usage example:
