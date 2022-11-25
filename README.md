@@ -40,17 +40,23 @@ have not tried, if you do please lemme know :)
 
 You will want dynamic build on the linux, and you doubtfully want curl on rpi itself so build with:
 
- make STATIC=0 NOCURL=1
+```
+make STATIC=0 NOCURL=1
+```
 
 Now if you want curl, make sure you have curl libs 7.57 or newer installed (note default armbian on opi comes with 7.38 that's old and won't work so you have to add newer curl lib manually) then this should work
-
+```
  make STATIC=0
-
+```
 
 
 
 # usage example:
-
+On linux:
+```
+~$ gcodestat out.nc -Q
+681
+```
 ```
 e:\Dev\eclipse-workspace\gcodestat>gcodestat.exe -c samples\config.txt -g samples\31min17sec.gcode
 gcodestat v0.0
