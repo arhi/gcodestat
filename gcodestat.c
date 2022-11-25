@@ -22,7 +22,9 @@
 #include <string.h>
 #include <stdbool.h>
 #include <math.h>
+#ifndef __APPLE__
 #include <malloc.h>
+#endif
 #include <sys/time.h>
 
 #ifndef NOCURL
